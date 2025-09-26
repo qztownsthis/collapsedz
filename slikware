@@ -2497,7 +2497,6 @@ effects:AddToggle({
 });
 effects:AddColorPicker({
     Name = "Hit effects color",
-    Flag = "Choose_hitefcolor",
 	Default = getgenv().hiteffects.HitEffectColor,
 	Callback = function(a)
 	    getgenv().hiteffects.HitEffectColor = a
