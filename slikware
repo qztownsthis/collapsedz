@@ -152,7 +152,7 @@ Frame.Active = true
 TextButton.Parent = Frame
 TextButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 TextButton.BackgroundTransparency = 0.5
-TextButton.Size = UDim2.new(0, 100, 0, 100)
+TextButton.Size = UDim2.new(0, 75, 0, 75)
 TextButton.AnchorPoint = Vector2.new(0.5, 0.5)
 TextButton.Position = UDim2.new(0.5, 0, 0.5, 0)
 TextButton.Image = "rbxassetid://118812610351193"
@@ -328,7 +328,7 @@ RunService.RenderStepped:Connect(function()
     if getgenv().LookAtEnabled then
         local char = LocalPlayer.Character
         local root = char and char:FindFirstChild("HumanoidRootPart")
-        local targetPlayer = Arx and Arx.Targetaim and Arx.Targetaim.target
+        local targetPlayer = slikware and slikware.Targetaim and slikware.Targetaim.target
 
         if root and targetPlayer and targetPlayer.Character then
             local targetRoot = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
@@ -1101,6 +1101,14 @@ runservice.RenderStepped:Connect(
         end
     end
 )
+
+getgenv().hiteffects = {
+    Types = {},                        
+    Enabled = false,
+    HitEffectType = "Nova",                 
+    HitEffectColor = Color3.fromRGB(255, 255, 255), 
+    Duration = 2                       
+}
 
 local hit = getgenv().hiteffects
 
@@ -1905,17 +1913,23 @@ HitEffectModule.Functions.Effect = function(character, color)
         end
     end
 
+    task.delay(hit.Duration, function()
+        effectAttachment:Destroy()
+    end)
+end
+
 local mainz = Main:AddLeftGroupbox("Toggles", "lock-keyhole")
 local set = Main:AddLeftGroupbox("Settings", "wrench")
 local air = Main:AddRightGroupbox("Auto Air", "cloud-cog")
 local gs = Main:AddRightGroupbox("Anti GroundShot", "align-vertical-distribute-center")
 local fov = Main:AddRightGroupbox("FOV Settings", "locate")
-local hit = Main:AddRightGroupbox("Hit-Sounds", "audio-lines")
+local sound = Main:AddRightGroupbox("Hit-Sounds", "audio-lines")
+local effects = Main:AddLeftGroupbox(" Hit-Effects", "wrench")
 local target = Misc:AddRightGroupbox("Enemy Settings", "zap")
 local cham = Misc:AddLeftGroupbox("Chams", "circuit-board")
 local cross = Misc:AddRightGroupbox("Crosshair", "cross")
 local esp = Misc:AddLeftGroupbox("Player ESP", "users-round")
-local effects = Main:AddLeftGroupbox("Hit Effects", "wrench")
+local hvh = Misc:AddLeftGroupbox("Target Strafe", "atom")
 
 mainz:AddToggle("Toggle_cam", {
     Risky = true,
@@ -2017,7 +2031,7 @@ set:AddInput("smoothness", {
     end
 })
 
-hit:AddToggle("toggle_hitsound", {
+sound:AddToggle("toggle_hitsound", {
     Text = "Toggle Hitsound",
     Default = getgenv().hit.detection,
     Risky = false,
@@ -2027,7 +2041,7 @@ hit:AddToggle("toggle_hitsound", {
     end
 })
 
-hit:AddToggle("toggle_logs", {
+sound:AddToggle("toggle_logs", {
     Text = "Toggle Notify",
     Default = getgenv().hit.logs,
     Risky = false,
@@ -2037,7 +2051,7 @@ hit:AddToggle("toggle_logs", {
     end
 })
 
-hit:AddDropdown("hit_ids", {
+sound:AddDropdown("hit_ids", {
     Text = "Sound Id's",
     Multi = false,
     Tooltip = "Choose The Sound Id",
@@ -2148,48 +2162,6 @@ fov:AddSlider("fov_radius", {
         getgenv().exlareCircle.radius = Value
     end
 })
-
-hvh:AddToggle("toggle_orbit", {
-    Text = "Toggle Target Strafe",
-    Default = getgenv().orbit.enabled,
-    Risky = true,
-    Tooltip = "I suggest don't toggle",
-    Callback = function(Value)
-       getgenv().orbit.enabled = Value
-    end
-})
-
-hvh:AddInput("orbit_speed", {
-    Text = "Speed",
-    Default = getgenv().orbit.speed,
-    Finished = true,
-    Placeholder = "Input Speed..",
-    Callback = function(Value)
-        getgenv().orbit.speed = Value
-    end
-})
-
-hvh:AddInput("orbit_height", {
-    Text = "Height",
-    Default = getgenv().orbit.height,
-    Finished = true,
-    Placeholder = "Insert Height..",
-    Callback = function(v)
-       getgenv().orbit.height = v
-    end
-})
-
-hvh:AddInput("orbit_distance", {
-    Text = "Distances",
-    Default = getgenv().orbit.distance,
-    Finished = true,
-    Placeholder = "Insert Distance..",
-    Callback = function(val)
-        getgenv().orbit.distance = val
-    end
-})
-
-hvh:AddLabel("Make sure Camlocks it's on")
 
 esp:AddToggle("toggle_esp", {
     Text = "Toggle ESP",
@@ -2464,22 +2436,83 @@ cross:AddSlider("cross_resizespeed", {
         getgenv().crosshair.resize_speed = Value
     end
 })
-effects:AddDropdown("effects", {
-	Text = "Hit Effects", 
-	Default = getgenv().hiteffects, 
-	Values = {"Nova", "Crescent Slash", "Coom", "Cosmic Explosion", "Slash", "Atomic Slash", "AuraBurst", "Thunder"}, 
-	Callback = function(b)
-	   getgenv().hiteffects = b
-	end
-}) 
-effects:AddColorPicker("effects_clor", {
-    Title = "Effect Color",
-    Default = getgenv().hiteffects,
-    Transparency = 0,
-    Callback = function(b)
-        getgenv().hiteffects = b
+
+hvh:AddToggle("toggle_orbit", {
+    Text = "Toggle Target Strafe",
+    Default = getgenv().orbit.enabled,
+    Risky = true,
+    Tooltip = "I suggest don't toggle",
+    Callback = function(Value)
+       getgenv().orbit.enabled = Value
     end
 })
+
+hvh:AddInput("orbit_speed", {
+    Text = "Speed",
+    Default = getgenv().orbit.speed,
+    Finished = true,
+    Placeholder = "Input Speed..",
+    Callback = function(Value)
+        getgenv().orbit.speed = Value
+    end
+})
+
+hvh:AddInput("orbit_height", {
+    Text = "Height",
+    Default = getgenv().orbit.height,
+    Finished = true,
+    Placeholder = "Insert Height..",
+    Callback = function(v)
+       getgenv().orbit.height = v
+    end
+})
+
+hvh:AddInput("orbit_distance", {
+    Text = "Distances",
+    Default = getgenv().orbit.distance,
+    Finished = true,
+    Placeholder = "Insert Distance..",
+    Callback = function(val)
+        getgenv().orbit.distance = val
+    end
+})
+
+hvh:AddLabel("Make sure Camlocks it's on")
+
+effects:AddToggle({
+    Name = "Toggle Hit Effects",
+    Default = getgenv().hiteffects.Enabled,
+    Flag = "Toggle_Hiteffect",
+    Callback = function(a)
+        getgenv().hiteffects.Enabled = a
+    end,
+});
+effects:AddToggle({
+    Name = "Toggle Logs",
+    Default = getgenv().hit.logs,
+    Flag = "toggle_logs",
+    Callback = function(a)
+        getgenv().hit.logs = a
+    end,
+});
+effects:AddColorPicker({
+    Name = "Hit effects color",
+    Flag = "Choose_hitefcolor",
+	Default = getgenv().hiteffects.HitEffectColor,
+	Callback = function(a)
+	    getgenv().hiteffects.HitEffectColor = a
+    end,
+});
+effects:AddDropdown({
+    Name = "Effects",
+    Default = getgenv().hiteffects.HitEffectType,
+    Values = hiteffect,
+    Multi = false,
+    Flag = "choose_effecttype",
+    Callback = function(a)
+        getgenv().hiteffects.HitEffectType = a
+    end,
+});
 
 function isframework(scriptInstance)
     if tostring(scriptInstance) == "Framework" then
